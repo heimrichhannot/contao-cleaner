@@ -1,0 +1,33 @@
+{
+    "name": "heimrichhannot/contao-cleaner",
+    "description":"This module adds cleaner functionality for periodically removing arbitrary entities and/or files fulfilling a certain condition in Contao (using TL_CRON or your server's cron).",
+    "keywords":["contao", "cleaner", "entity", "file", "module", "developer"],
+    "type": "contao-module",
+    "homepage":"https://github.com/heimrichhannot/contao-cleaner",
+    "license":"LGPL-3.0+",
+    "authors":[
+        {
+            "name":"Heimrich & Hannot",
+            "email":"digitales@heimrich-hannot.de",
+            "homepage":"http://www.heimrich-hannot.de",
+            "role":"Developer"
+        }
+    ],
+    "support":{
+        "issues":"https://github.com/heimrichhannot/contao-cleaner/issues"
+    },
+    "require": {
+        "contao/core": ">=3.2,<4-dev",
+        "heimrichhannot/contao-haste_plus": ">=1.4.0"
+    },
+    "autoload": {
+        "classmap": [""]
+    },
+    "extra": {
+        "contao": {
+            "sources": {
+                "": "system/modules/cleaner"
+            }
+        }
+    }
+}
