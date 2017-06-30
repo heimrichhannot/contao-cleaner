@@ -3,7 +3,7 @@
 /**
  * Backend modules
  */
-$GLOBALS['BE_MOD']['devtools']['cleaner'] = [
+$GLOBALS['BE_MOD']['system']['cleaner'] = [
     'tables' => ['tl_cleaner'],
     'icon'   => 'system/modules/cleaner/assets/img/icon.png'
 ];
