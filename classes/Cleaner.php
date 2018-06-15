@@ -2,6 +2,7 @@
 
 namespace HeimrichHannot\Cleaner;
 
+use HeimrichHannot\Haste\Dca\General;
 use HeimrichHannot\Haste\Util\Files;
 
 class Cleaner extends \Controller
@@ -15,7 +16,7 @@ class Cleaner extends \Controller
     ];
 
     const FILEDIR_RETRIEVAL_MODE_ENTITY_FIELDS = 'entityFields';
-    const FILEDIR_RETRIEVAL_MODE_DIRECTORY = 'directory';
+    const FILEDIR_RETRIEVAL_MODE_DIRECTORY     = 'directory';
 
     const FILEDIR_RETRIEVAL_MODES = [
         self::FILEDIR_RETRIEVAL_MODE_ENTITY_FIELDS,
@@ -47,38 +48,65 @@ class Cleaner extends \Controller
         $arrOrder   = deserialize(\Config::get('cleanerOrder'), true);
         $arrOptions = [];
 
-        if (count($arrOrder) > 0)
-        {
+        if (count($arrOrder) > 0) {
             $arrOptions = [
                 'order' => 'FIELD(id,' . implode(',', $arrOrder) . ')'
             ];
         }
 
-        if (($objCleaners = CleanerModel::findBy(['published=?', 'period=?'], [true, $strPeriod], $arrOptions)) !== null)
-        {
-            while ($objCleaners->next())
-            {
-                switch ($objCleaners->type)
-                {
+        if (($objCleaners = CleanerModel::findBy(['published=?', 'period=?'], [true, $strPeriod], $arrOptions)) !== null) {
+            while ($objCleaners->next()) {
+                switch ($objCleaners->type) {
                     case static::TYPE_ENTITY:
-                        if (!$objCleaners->whereCondition)
-                        {
+                        if (!$objCleaners->whereCondition) {
                             continue 2;
                         }
 
-                        $strQuery = "DELETE FROM $objCleaners->dataContainer WHERE ($objCleaners->whereCondition)";
+                        $strQuery = "SELECT id FROM $objCleaners->dataContainer WHERE ($objCleaners->whereCondition)";
 
-                        if ($objCleaners->addMaxAge)
-                        {
+                        if ($objCleaners->addMaxAge) {
                             $strQuery .= static::getMaxAgeCondition($objCleaners);
                         }
 
-                        \Database::getInstance()->execute(html_entity_decode($strQuery));
+                        $result = \Database::getInstance()->execute(html_entity_decode($strQuery));
+
+                        if ($result->numRows > 0) {
+                            $ids = $result->fetchEach('id');
+
+                            if (null !== ($models = General::getModelInstances($objCleaners->dataContainer, [
+                                    'column' => ["$objCleaners->dataContainer.id IN(" . implode(',', array_map('intval', $ids)) . ")"],
+                                    'value'  => null,
+                                    'return' => 'Collection'
+                                ]))) {
+
+                                while ($models->next()) {
+                                    $data = $models->row();
+
+                                    $affectedRows = $models->delete();
+
+                                    if ($affectedRows > 0 && $objCleaners->addPrivacyProtocolEntry)
+                                    {
+                                        $protocolManager = new \HeimrichHannot\Privacy\Manager\ProtocolManager();
+
+                                        if ($objCleaners->privacyProtocolEntryDescription)
+                                        {
+                                            $data['description'] = $objCleaners->privacyProtocolEntryDescription;
+                                        }
+
+                                        $protocolManager->addEntry(
+                                            $objCleaners->privacyProtocolEntryType,
+                                            $objCleaners->privacyProtocolEntryArchive,
+                                            $data,
+                                            'heimrichhannot/contao-cleaner'
+                                        );
+                                    }
+                                }
+                            }
+                        }
 
                         break;
                     case static::TYPE_FILE:
-                        switch ($objCleaners->fileDirRetrievalMode)
-                        {
+                        switch ($objCleaners->fileDirRetrievalMode) {
                             case static::FILEDIR_RETRIEVAL_MODE_DIRECTORY:
                                 $strPath = Files::getPathFromUuid($objCleaners->directory);
 
@@ -86,57 +114,46 @@ class Cleaner extends \Controller
 
                                 $objFolder->purge();
 
-                                if ($objCleaners->addGitKeepAfterClean)
-                                {
+                                if ($objCleaners->addGitKeepAfterClean) {
                                     touch(TL_ROOT . '/' . $strPath . '/.gitkeep');
                                 }
 
                                 break;
                             case static::FILEDIR_RETRIEVAL_MODE_ENTITY_FIELDS:
-                                if (!$objCleaners->whereCondition)
-                                {
+                                if (!$objCleaners->whereCondition) {
                                     continue 2;
                                 }
 
                                 $arrFields = deserialize($objCleaners->entityFields, true);
 
-                                if (empty($arrFields))
-                                {
+                                if (empty($arrFields)) {
                                     continue 2;
                                 }
 
                                 $strQuery = "SELECT * FROM $objCleaners->dataContainer WHERE ($objCleaners->whereCondition)";
 
-                                if ($objCleaners->addMaxAge)
-                                {
+                                if ($objCleaners->addMaxAge) {
                                     $strQuery .= static::getMaxAgeCondition($objCleaners);
                                 }
 
                                 $objInstances = \Database::getInstance()->execute(html_entity_decode($strQuery));
 
-                                if ($objInstances->numRows > 0)
-                                {
-                                    while ($objInstances->next())
-                                    {
-                                        foreach ($arrFields as $strField)
-                                        {
-                                            if (!$objInstances->{$strField})
-                                            {
+                                if ($objInstances->numRows > 0) {
+                                    while ($objInstances->next()) {
+                                        foreach ($arrFields as $strField) {
+                                            if (!$objInstances->{$strField}) {
                                                 continue;
                                             }
 
                                             // deserialize if necessary
                                             $varValue = deserialize($objInstances->{$strField});
 
-                                            if (!is_array($varValue))
-                                            {
+                                            if (!is_array($varValue)) {
                                                 $varValue = [$varValue];
                                             }
 
-                                            foreach ($varValue as $strFile)
-                                            {
-                                                if (($objFile = Files::getFileFromUuid($strFile, true)) === null)
-                                                {
+                                            foreach ($varValue as $strFile) {
+                                                if (($objFile = Files::getFileFromUuid($strFile, true)) === null) {
                                                     continue;
                                                 }
 
@@ -159,8 +176,7 @@ class Cleaner extends \Controller
         $arrMaxAge = deserialize($objCleaner->maxAge, true);
 
         $intFactor = 1;
-        switch ($arrMaxAge['unit'])
-        {
+        switch ($arrMaxAge['unit']) {
             case 'm':
                 $intFactor = 60;
                 break;
