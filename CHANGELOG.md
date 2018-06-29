@@ -1,10 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
-## [1.1.0] - 2018-06-15
+## [1.0.4] - 2018-06-29
 
-### Added
-- support for heimrichhannot/contao-privacy
+### Fixed
+- switched deletion of entities to database -> there's not always a model for a db table
 
 ## [1.0.3] - 2018-02-15
 

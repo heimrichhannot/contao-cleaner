@@ -2,6 +2,7 @@
 
 namespace HeimrichHannot\Cleaner;
 
+use Contao\Database;
 use HeimrichHannot\Haste\Dca\General;
 use HeimrichHannot\Haste\Util\Files;
 
@@ -69,23 +70,25 @@ class Cleaner extends \Controller
                         }
 
                         $result = \Database::getInstance()->execute(html_entity_decode($strQuery));
+                        $removedCount = 0;
 
                         if ($result->numRows > 0) {
-                            $ids = $result->fetchEach('id');
+                            foreach ($result->fetchEach('id') as $id)
+                            {
+                                $db = Database::getInstance();
 
-                            if (null !== ($models = General::getModelInstances($objCleaners->dataContainer, [
-                                    'column' => ["$objCleaners->dataContainer.id IN(" . implode(',', array_map('intval', $ids)) . ")"],
-                                    'value'  => null,
-                                    'return' => 'Collection'
-                                ]))) {
+                                $singleResult = $db->prepare("SELECT * FROM $objCleaners->dataContainer WHERE $objCleaners->dataContainer.id=?")->limit(1)->execute($id);
 
-                                while ($models->next()) {
-                                    $data = $models->row();
+                                if ($singleResult->numRows > 0)
+                                {
+                                    $data = $singleResult->row();
+                                    $data['table'] = $objCleaners->dataContainer;
 
-                                    $affectedRows = $models->delete();
+                                    $deleteResult = $db->prepare("DELETE FROM $objCleaners->dataContainer WHERE $objCleaners->dataContainer.id=?")->execute($id);
 
-                                    if ($affectedRows > 0 && $objCleaners->addPrivacyProtocolEntry)
-                                    {
+                                    if ($deleteResult->affectedRows > 0 && $objCleaners->addPrivacyProtocolEntry) {
+                                        ++$removedCount;
+
                                         $protocolManager = new \HeimrichHannot\Privacy\Manager\ProtocolManager();
 
                                         if ($objCleaners->privacyProtocolEntryDescription)
