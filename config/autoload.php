@@ -25,7 +25,7 @@ ClassLoader::addClasses(array
 (
 	// Classes
 	'HeimrichHannot\Cleaner\Cleaner'         => 'system/modules/cleaner/classes/Cleaner.php',
-	'HeimrichHannot\Backend\Cleaner\Cleaner' => 'system/modules/cleaner/classes/backend/Cleaner.php',
+	'HeimrichHannot\Cleaner\Backend\Cleaner' => 'system/modules/cleaner/classes/backend/Cleaner.php',
 
 	// Models
 	'HeimrichHannot\Cleaner\CleanerModel'    => 'system/modules/cleaner/models/CleanerModel.php',

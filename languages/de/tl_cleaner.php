@@ -8,7 +8,7 @@ $arrLang = &$GLOBALS['TL_LANG']['tl_cleaner'];
 $arrLang['title'] = ['Titel', 'Geben Sie hier bitte den Titel ein.'];
 $arrLang['type'] = ['Typ', 'Wählen Sie hier einen Typ aus.'];
 $arrLang['tstamp'] = ['Änderungsdatum', ''];
-$arrLang['dataContainer'] = ['Entität', 'Wählen Sie hier die Datenbanktabelle der gewünschten Entität aus.'];
+$arrLang['dataContainer'] = ['Entität', 'Wählen Sie hier die Datenbanktabelle der gewünschten Entität aus, die gelöscht werden soll.'];
 $arrLang['whereCondition'] = ['Bedingung für das Löschen (!)', 'Geben Sie hier die Bedingung ein, die erfüllt sein muss, damit eine Entität gelöscht wird. Aus Sicherheitsgründen ist dieses Feld ein Pflichtfeld. Wenn Sie keine Bedingung vergeben möchten, geben Sie einfach 1=1 ein.'];
 $arrLang['addMaxAge'] = ['Maximales Alter hinzufügen', 'Wählen Sie diese Option, wenn ptoentiell zu löschende Entitäten ein bestimmtes Maximalalter haben dürfen, das sie vor dem Löschen schützt.'];
 $arrLang['maxAge'] = ['Maximales Alter inaktiver Datensätze', 'Wählen Sie hier aus, wie alt eine inaktive Datensatz höchstens sein darf, bevor sie gelöscht wird.'];
@@ -27,6 +27,9 @@ $arrLang['fileDirRetrievalMode'] = ['Zu entfernende Dateien & Verzeichnisse ermi
 $arrLang['entityFields'] = ['Felder', 'Wählen Sie hier die Felder aus, in denen eine Referenz zu einer oder mehreren Dateien bzw. Verzeichnissen gespeichert ist.'];
 $arrLang['directory'] = ['Zu leerendes Verzeichnis', 'Wählen Sie hier das relevante zu leerende Verzeichnis aus.'];
 $arrLang['addGitKeepAfterClean'] = ['.gitkeep nach dem Leeren erzeugen', 'Wählen Sie diese Option, wenn Sie nach dem Leeren des Verzeichnisses in diesem eine .gitkeep-Datei erzeugen wollen. Sinnvoll, wenn das Verzeichnis auch "leer" in ein git-Repository eingecheckt werden soll.'];
+$arrLang['addDependency'] = ['Abhängigkeit hinzufügen','Wählen Sie diese Option, wenn das Löschen der Entität von einer anderen Entität abhängt.'];
+$arrLang['dependentTable'] = ['abhängige Tabelle','Wählen Sie hier die Tabelle die die Entität beinhaltet von welcher die Löschung abhängt.'];
+$arrLang['dependentField'] = ['Feld','Wählen Sie hier das Feld aus über das die zu löschende Entität mit der abhängigen Entität verbunden ist.'];
 
 /**
  * Legends
@@ -40,6 +43,7 @@ $arrLang['publish_legend'] = 'Aktivierung';
  */
 $arrLang['reference'] = [
     \HeimrichHannot\Cleaner\Cleaner::TYPE_ENTITY => 'Entität',
+    \HeimrichHannot\Cleaner\Cleaner::TYPE_DEPENDENT_ENTITY => 'abhängige Entität',
     \HeimrichHannot\Cleaner\Cleaner::TYPE_FILE => 'Datei',
     \HeimrichHannot\Cleaner\Cleaner::FILEDIR_RETRIEVAL_MODE_ENTITY_FIELDS => 'Felder von Entitäten',
     \HeimrichHannot\Cleaner\Cleaner::FILEDIR_RETRIEVAL_MODE_DIRECTORY => 'Verzeichnis'
