@@ -1,6 +1,11 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [1.2.1] - 2018-10-26
+
+### Changed
+- sql of `dependentField` for cleaner type of dependent entities
+
 ## [1.2.0] - 2018-10-25
 
 ### Added
